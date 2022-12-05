@@ -1,3 +1,20 @@
+# WebRTC Native Client Momo + DataChannel via pynng
+Ayame モードにおいて、 Python script からのメッセージの送受信を DataChannel 経由で受け付けるように改造した [momo](https://github.com/shiguredo/momo) のソースコードです。
+
+以下の記事を参考に、nng (nanomsg for next generation) を用いた改造を行っています。
+
+Momo改造版を使ってRasPi Zero W＋GPUマシンで画像処理をしてみる
+https://zenn.dev/kounoike/articles/20210420-momo-pizero-dbface
+
+記事で紹介されている [改造版 momo](https://github.com/kounoike/momo) が deprecated となったため、'21/12/05 時点での最新版の momo (v.2022.3.0) をベースに改造を行っています。 
+
+[nng branch](https://github.com/yhiroi/momo-nng/tree/nng) より clone し、[BUILD_LINUX.md](doc/BUILD_LINUX.md) を参考にビルドしてください。
+ubuntu-20.04_x86_64 のみ動作確認済です。
+
+※注意 : nng による改造は現時点では私の自家製改造版にすぎません。株式会社時雨堂様へのお問い合わせは慎んでください。
+
+以下は、オリジナル版 momo の README.md です。
+
 # WebRTC Native Client Momo
 
 [![libwebrtc](https://img.shields.io/badge/libwebrtc-m107.5304-blue.svg)](https://chromium.googlesource.com/external/webrtc/+/branch-heads/5304)
