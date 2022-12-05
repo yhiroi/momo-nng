@@ -5,11 +5,13 @@ ARG PACKAGE_NAME
 
 LABEL jp.shiguredo.momo=$PACKAGE_NAME
 
+RUN set -x && cat /etc/resolv.conf
+# RUN echo "nameserver 8.8.8.8" |  tee /etc/resolv.conf > /dev/null
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # パッケージのインストール
-
 COPY script/apt_install_x86_64.sh /root/
+
 RUN --mount=type=cache,id=$PACKAGE_NAME,target=/var/cache/apt --mount=type=cache,id=$PACKAGE_NAME,target=/var/lib/apt \
   /root/apt_install_x86_64.sh \
   && apt-get -y install libdrm-dev
@@ -79,6 +81,8 @@ ENV PATH "/root/cmake/bin:$PATH"
 ARG SDL2_VERSION
 
 COPY script/setup_sdl2.sh /root/
+COPY script/SDL2-$SDL2_VERSION.tar.gz /root/
+
 RUN \
   set -ex \
   && /root/setup_sdl2.sh "$SDL2_VERSION" /root/sdl2-source \
@@ -138,6 +142,26 @@ RUN set -ex \
   && add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" \
   && apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get -y install cuda=$CUDA_VERSION clang-10
+
+# nanomsg/nng
+ARG NNG_VERSION
+RUN set -ex \
+  && git clone https://github.com/nanomsg/nng.git /root/nng-source \
+  && mkdir -p /root/nng-source/build \
+  && cd /root/nng-source/build \
+  && cmake \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/root/nng \
+      -DCMAKE_C_COMPILER=/root/llvm/clang/bin/clang \
+      -DCMAKE_CXX_COMPILER=/root/llvm/clang/bin/clang++ \
+      ../ \
+  && cmake --build . -j$JOBS \
+  && cmake --build . --target install
+
+# cwzx/nngpp
+ARG NNGPP_VERSION
+RUN git clone --branch nng-v$NNGPP_VERSION --depth 1 https://github.com/cwzx/nngpp.git /root/nngpp
 
 # libva
 ARG LIBVA_VERSION

@@ -16,10 +16,13 @@ set(USE_JETSON_ENCODER OFF CACHE BOOL "Jetson のハードウェアエンコー�
 set(USE_MSDK_ENCODER OFF CACHE BOOL "Intel Media SDK のハードウェアエンコーダを利用するかどうか")
 set(USE_H264 OFF CACHE BOOL "H264 を利用するかどうか")
 set(USE_SDL2 OFF CACHE BOOL "SDL2 による画面出力を利用するかどうか")
+set(USE_NNG OFF CACHE BOOL "nanomsg next generation による画面転送を利用するかどうか")
 set(USE_LINUX_PULSE_AUDIO OFF CACHE BOOL "Linux で ALSA の代わりに PulseAudio を利用するか")
 set(USE_SCREEN_CAPTURER OFF CACHE BOOL "スクリーンキャプチャラを利用するかどうか")
 set(BOOST_ROOT_DIR "" CACHE PATH "Boost のインストール先ディレクトリ\n空文字だった場合はデフォルト検索パスの Boost を利用する")
 set(SDL2_ROOT_DIR "" CACHE PATH "SDL2 のインストール先ディレクトリ\n空文字だった場合はデフォルト検索パスの SDL2 を利用する")
+set(NNG_ROOT_DIR "" CACHE PATH "nanomsg/nng のインストール先ディレクトリ\n空文字だった場合はデフォルト検索パスの nng を利用する")
+set(NNGPP_ROOT_DIR "" CACHE PATH "cwzx/nngpp のインストール先ディレクトリ\n空文字だった場合はデフォルト検索パスの nngpp を利用する")
 set(CLI11_ROOT_DIR "" CACHE PATH "CLI11 のインストール先ディレクトリ")
 set(NVCODEC_ROOT_DIR "" CACHE PATH "NVIDIA VIDEO CODEC SDK のインストール先ディレクトリ")
 set(WEBRTC_INCLUDE_DIR "" CACHE PATH "WebRTC のインクルードディレクトリ")
@@ -77,7 +80,10 @@ elseif(MOMO_PACKAGE_NAME STREQUAL "raspberry-pi-os_armv6")
   set(TARGET_ARCH_ARM "armv6")
   set(USE_MMAL_ENCODER ON)
   set(USE_H264 ON)
+  set(USE_NNG ON)
   set(BOOST_ROOT_DIR /root/boost)
+  set(NNG_ROOT_DIR /root/nng)
+  set(NNGPP_ROOT_DIR /root/nngpp)
   set(CLI11_ROOT_DIR /root/CLI11)
   set(WEBRTC_INCLUDE_DIR /root/webrtc/include)
   set(WEBRTC_LIBRARY_DIR /root/webrtc/lib)
@@ -98,8 +104,11 @@ elseif(MOMO_PACKAGE_NAME STREQUAL "raspberry-pi-os_armv7")
   set(USE_MMAL_ENCODER ON)
   set(USE_H264 ON)
   set(USE_SDL2 ON)
+  set(USE_NNG ON)
   set(BOOST_ROOT_DIR /root/boost)
   set(SDL2_ROOT_DIR /root/SDL2)
+  set(NNG_ROOT_DIR /root/nng)
+  set(NNGPP_ROOT_DIR /root/nngpp)
   set(CLI11_ROOT_DIR /root/CLI11)
   set(WEBRTC_INCLUDE_DIR /root/webrtc/include)
   set(WEBRTC_LIBRARY_DIR /root/webrtc/lib)
@@ -176,12 +185,15 @@ elseif(MOMO_PACKAGE_NAME STREQUAL "ubuntu-20.04_x86_64")
   set(TARGET_ARCH "x86_64")
   set(USE_H264 ON)
   set(USE_SDL2 ON)
+  set(USE_NNG ON)
   set(USE_NVCODEC_ENCODER ON)
   set(USE_MSDK_ENCODER ON)
   set(USE_SCREEN_CAPTURER ON)
   set(BOOST_ROOT_DIR /root/boost)
   set(CLI11_ROOT_DIR /root/CLI11)
   set(SDL2_ROOT_DIR /root/SDL2)
+  set(NNG_ROOT_DIR /root/nng)
+  set(NNGPP_ROOT_DIR /root/nngpp)
   set(LIBVA_ROOT_DIR /root/libva)
   set(MSDK_ROOT_DIR /root/msdk)
   set(WEBRTC_INCLUDE_DIR /root/webrtc/include)
@@ -328,6 +340,7 @@ target_compile_definitions(momo
     USE_MSDK_ENCODER=$<BOOL:${USE_MSDK_ENCODER}>
     USE_H264=$<BOOL:${USE_H264}>
     USE_SDL2=$<BOOL:${USE_SDL2}>
+    USE_NNG=$<BOOL:${USE_NNG}>
     USE_LINUX_PULSE_AUDIO=$<BOOL:${USE_LINUX_PULSE_AUDIO}>
     USE_SCREEN_CAPTURER=$<BOOL:${USE_SCREEN_CAPTURER}>
     # https://github.com/boostorg/container_hash/issues/22 と同じ問題が clang-15 でも起きるので、これを手動で定義して回避する
@@ -374,6 +387,19 @@ if (USE_SDL2)
     )
   endif()
 endif()
+
+if (USE_NNG)
+target_sources(momo
+  PRIVATE
+    src/nng_sender/nng_sender.cpp
+    src/nng_sender/nng_data_manager.cpp
+  )
+  target_include_directories(momo PRIVATE ${NNG_ROOT_DIR}/include)
+  target_include_directories(momo PRIVATE ${NNGPP_ROOT_DIR}/include)
+  target_link_directories(momo PRIVATE ${NNG_ROOT_DIR}/lib)
+  target_link_libraries(momo PRIVATE nng)
+endif()
+
 
 if (USE_LIBCXX)
   target_compile_options(momo

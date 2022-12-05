@@ -17,9 +17,10 @@ OUTPUT_DIR=$2
 
 mkdir -p $OUTPUT_DIR
 pushd $OUTPUT_DIR
-  if [ ! -e SDL2-$SDL2_VERSION.tar.gz ]; then
-    curl -LO http://www.libsdl.org/release/SDL2-$SDL2_VERSION.tar.gz
-  fi
+  # if [ ! -e SDL2-$SDL2_VERSION.tar.gz ]; then
+  #   curl -LO http://www.libsdl.org/release/SDL2-$SDL2_VERSION.tar.gz
+  # fi
+  cp ../SDL2-$SDL2_VERSION.tar.gz .
   rm -rf source
   rm -rf SDL2-$SDL2_VERSION
   tar xf SDL2-$SDL2_VERSION.tar.gz

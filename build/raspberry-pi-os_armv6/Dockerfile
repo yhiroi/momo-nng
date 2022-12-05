@@ -84,3 +84,33 @@ ARG CMAKE_VERSION
 COPY script/get_cmake.sh /root/
 RUN /root/get_cmake.sh "$CMAKE_VERSION" linux /root
 ENV PATH "/root/cmake/bin:$PATH"
+
+# nanomsg/nng
+ARG NNG_VERSION
+RUN set -ex \
+  && git clone --branch v$NNG_VERSION --depth 1 https://github.com/nanomsg/nng.git /root/nng-source \
+  && mkdir -p /root/nng-source/build \
+  && cd /root/nng-source/build \
+  && cmake \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_SYSTEM_NAME=Linux \
+      -DCMAKE_SYSTEM_PROCESSOR=arm \
+      -DCMAKE_INSTALL_PREFIX=/root/nng \
+      -DCMAKE_C_COMPILER=/root/llvm/clang/bin/clang \
+      -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf \
+      -DCMAKE_CXX_COMPILER=/root/llvm/clang/bin/clang++ \
+      -DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf \
+      -DCMAKE_FIND_ROOT_PATH=/root/rootfs \
+      -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+      -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH \
+      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH \
+      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
+      -DCMAKE_SYSROOT=/root/rootfs \
+      ../ \
+  && cmake --build . -j$JOBS \
+  && cmake --build . --target install
+
+# cwzx/nngpp
+ARG NNGPP_VERSION
+RUN git clone --branch nng-v$NNGPP_VERSION --depth 1 https://github.com/cwzx/nngpp.git /root/nngpp
