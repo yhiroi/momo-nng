@@ -6,7 +6,7 @@ Ayame モードにおいて、 Python script からのメッセージの送受�
 Momo改造版を使ってRasPi Zero W＋GPUマシンで画像処理をしてみる
 https://zenn.dev/kounoike/articles/20210420-momo-pizero-dbface
 
-記事で紹介されている [改造版 momo](https://github.com/kounoike/momo) が deprecated となったため、'21/12/05 時点での最新版の momo (v.2022.3.0) をベースに改造を行っています。 
+記事で紹介されている [改造版 momo](https://github.com/kounoike/momo) が obsoleted となったため、'21/12/05 時点での最新版の momo (v.2022.3.0) をベースに改造を行っています。 
 
 [nng branch](https://github.com/yhiroi/momo-nng/tree/nng) より clone し、[BUILD_LINUX.md](doc/BUILD_LINUX.md) を参考にビルドしてください。
 ubuntu-20.04_x86_64 のみ動作確認済です。
